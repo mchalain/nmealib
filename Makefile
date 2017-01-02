@@ -14,7 +14,7 @@ SMPLOBJ = $(SAMPLES:%=samples/%/main.o)
 INCS = -I include 
 LIBS = -lm -Llib -lnmea
  
-.PHONY: all all-before all-after clean clean-custom doc
+.PHONY: all all-before all-after clean clean-custom doc debug
  
 all: all-before $(BIN) samples all-after 
 
@@ -30,12 +30,15 @@ doc:
 	
 remake: clean all
 
+debug: CFLAGS+=-g
+debug: all
+
 lib/$(TARGET).a: $(LINKOBJ)
 	ar rsc $@ $^
 	ranlib $@
 
 build/nmea_gcc/%.o: src/%.c 
-	$(CC) $(INCS) -c $< -o $@
+	$(CC) $(CFLAGS) $(INCS) -c $< -o $@
 
 samples: $(SMPLS)
 
@@ -43,4 +46,4 @@ samples_%: samples/%/main.o
 	$(CC) $< $(LIBS) -o build/$@
 
 samples/%/main.o: samples/%/main.c
-	$(CC) $(INCS) -c $< -o $@
+	$(CC) $(CFLAGS) $(INCS) -c $< -o $@
