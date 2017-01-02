@@ -18,6 +18,7 @@ LIBS = -lm -Llib -lnmea
 all: all-before $(BIN) samples all-after 
 
 all-before:
+	mkdir -p lib
 	mkdir -p build/nmea_gcc
 
 clean: clean-custom 
