@@ -1,6 +1,7 @@
 CC = gcc 
  
-BIN = lib/libnmea.a 
+TARGET = libnmea
+BIN = lib/$(TARGET).a
 MODULES = generate generator parse parser tok context time info gmath sentence  
 SAMPLES = generate generator parse parse_file math
  
@@ -29,7 +30,7 @@ doc:
 	
 remake: clean all
 
-$(BIN): $(LINKOBJ)
+lib/$(TARGET).a: $(LINKOBJ)
 	ar rsc $@ $^
 	ranlib $@
 
