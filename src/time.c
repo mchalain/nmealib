@@ -8,9 +8,21 @@
  *
  */
 
-/*! \file time.h */
+#ifdef __GNUC__
+#define _GNU_SOURCE
+#include <dlfcn.h>
+#endif
 
+#include <stdlib.h>
+#include <unistd.h>
+#include <fcntl.h>
+
+#include "nmea/parse.h"
+#include "nmea/parser.h"
+
+/*! \file time.h */
 #include "nmea/time.h"
+
 
 #ifdef NMEA_WIN
 #   pragma warning(disable: 4201)
@@ -60,4 +72,68 @@ void nmea_time_now(nmeaTIME *stm)
     stm->hsec = 0;
 }
 
+#endif
+
+static int nmea_gpsfd = -1;
+static nmeaPARSER nmea_parser;
+static int (*pclock_gettime)(clockid_t, struct timespec *);
+
+__attribute__((constructor)) void nmea_init()
+{
+	const char defaultdevicename[] = "/dev/ttyS0";
+	char *devicename;
+	devicename = getenv("NMEA_TTYGPS");
+	if (!devicename)
+		devicename = (char *)defaultdevicename;
+	nmea_gpsfd = open(devicename, O_RDONLY);
+	if (nmea_gpsfd > 2 )
+		nmea_parser_init(&nmea_parser);
+
+#ifdef __GNUC__
+	pclock_gettime = (int (*)(clockid_t, struct timespec *))dlsym(RTLD_NEXT, "clock_gettime");
+#else
+	pclock_gettime = clock_gettime;
+#endif
+}
+
+__attribute__((destructor)) void nmea_deinit()
+{
+	if (nmea_gpsfd > 2 )
+		close(nmea_gpsfd);
+}
+
+int nmea_gettime(clockid_t clk_id, struct timespec *tp)
+{
+	if (CLOCK_REALTIME == clk_id && nmea_gpsfd > 2)
+	{
+		int size = 100;
+		char buff[101];
+
+		size = read(nmea_gpsfd, buff, size);
+		if (size > 0)
+		{
+			nmeaINFO info;
+			nmea_zero_INFO(&info);
+			nmea_parse(&nmea_parser, &buff[0], size, &info);
+
+			if (info.satinfo.inuse > 3)
+			{
+				struct tm gpstime;
+				gpstime.tm_year = info.utc.year;
+				gpstime.tm_mon = info.utc.mon;
+				gpstime.tm_mday = info.utc.day;
+				gpstime.tm_hour = info.utc.hour;
+				gpstime.tm_min = info.utc.min;
+				gpstime.tm_sec = info.utc.sec;
+				tp->tv_sec = mktime(&gpstime);
+				tp->tv_nsec = info.utc.hsec * 10000000;
+				return 0;
+			}
+		}
+	}
+	return pclock_gettime(clk_id, tp);
+}
+
+#ifdef __GNUC__
+int clock_gettime(clockid_t clk_id, struct timespec *tp) __attribute__ ((weak, alias ("nmea_gettime")));
 #endif

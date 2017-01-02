@@ -2,7 +2,7 @@ CC = gcc
  
 BIN = lib/libnmea.a 
 MODULES = generate generator parse parser tok context time info gmath sentence  
-SAMPLES = generate generator parse parse_file math
+SAMPLES = generate generator parse parse_file math gettime
  
 OBJ = $(MODULES:%=build/nmea_gcc/%.o) 
 LINKOBJ = $(OBJ) $(RES)
@@ -11,7 +11,7 @@ SMPLS = $(SAMPLES:%=samples_%)
 SMPLOBJ = $(SAMPLES:%=samples/%/main.o)
 
 INCS = -I include 
-LIBS = -lm -Llib -lnmea
+LIBS = -lm -Llib -lnmea -ldl
  
 .PHONY: all all-before all-after clean clean-custom doc
  
