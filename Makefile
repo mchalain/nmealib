@@ -33,6 +33,13 @@ remake: clean all
 debug: CFLAGS+=-g
 debug: all
 
+shared: CFLAGS+=-fPIC
+shared: BIN+=lib/$(TARGET).so
+shared:all
+
+lib/$(TARGET).so: $(LINKOBJ)
+	$(CC) -shared -Wl,-soname=$(TARGET) -o $@ $^ -lm
+
 lib/$(TARGET).a: $(LINKOBJ)
 	ar rsc $@ $^
 	ranlib $@
