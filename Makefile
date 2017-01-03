@@ -13,7 +13,7 @@ SMPLS = $(SAMPLES:%=samples_%)
 SMPLOBJ = $(SAMPLES:%=samples/%/main.o)
 
 INCS = -I include 
-LIBS = -lm -Llib -lnmea -ldl
+LIBS = -lm -Llib -lnmea -ldl -lrt
  
 .PHONY: all all-before all-after clean clean-custom doc debug shared
 
@@ -44,10 +44,10 @@ info:
 
 shared: CFLAGS += -fPIC
 shared: BIN += lib/$(TARGET).so
-shared: all-before lib/$(TARGET).so samples all-after 
+shared: all-before lib/$(TARGET).so samples  all-after
 
 lib/$(TARGET).so: $(LINKOBJ)
-	$(CC) -shared -Wl,-soname=$(TARGET) -o $@ $^ -lm -ldl
+	$(CC) -shared -Wl,-soname=$(TARGET) -o $@ $^ -lm -ldl -lrt
 
 lib/$(TARGET).a: $(LINKOBJ)
 	$(CROSS_COMPILE)ar rsc $@ $^

@@ -1,15 +1,22 @@
-#include <nmea/nmea.h>
 #include <time.h>
 #include <stdio.h>
+
+#ifdef __GNUC__
+#define _GNU_SOURCE
+#endif
+
+#ifndef _GNU_SOURCE
+#include <nmea/nmea.h>
+#endif
 
 int main()
 {
 	struct timespec ts;
 	struct tm *tm;
-#ifdef __GNUC__
+#ifdef _GNU_SOURCE
 	clock_gettime(CLOCK_REALTIME, &ts);
 #else
-	nmea_gettime(CLOCK_REALTIME, &ts);
+	nmea_gettime(CLOCK_GPS, &ts);
 #endif
 	tm = gmtime(&ts.tv_sec);
 	printf("date : %02d/%02d/%04d %02d:%02d:%02d\n",

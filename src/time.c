@@ -16,6 +16,7 @@
 #include <stdlib.h>
 #include <unistd.h>
 #include <fcntl.h>
+#include <errno.h>
 
 #include "nmea/parse.h"
 #include "nmea/parser.h"
@@ -82,14 +83,16 @@ __attribute__((constructor)) void nmea_init()
 {
 	const char defaultdevicename[] = "/dev/ttyS0";
 	char *devicename;
+
 	devicename = getenv("NMEA_TTYGPS");
 	if (!devicename)
 		devicename = (char *)defaultdevicename;
+
 	nmea_gpsfd = open(devicename, O_RDONLY);
 	if (nmea_gpsfd > 2 )
 		nmea_parser_init(&nmea_parser);
 
-#ifdef __GNUC__
+#ifdef _GNU_SOURCE
 	pclock_gettime = (int (*)(clockid_t, struct timespec *))dlsym(RTLD_NEXT, "clock_gettime");
 #else
 	pclock_gettime = clock_gettime;
@@ -104,7 +107,7 @@ __attribute__((destructor)) void nmea_deinit()
 
 int nmea_gettime(clockid_t clk_id, struct timespec *tp)
 {
-	if (CLOCK_REALTIME == clk_id && nmea_gpsfd > 2)
+	if ((CLOCK_GPS == clk_id || CLOCK_REALTIME == clk_id) && nmea_gpsfd > 2)
 	{
 		int size = 100;
 		char buff[101];
@@ -129,11 +132,16 @@ int nmea_gettime(clockid_t clk_id, struct timespec *tp)
 				tp->tv_nsec = info.utc.hsec * 10000000;
 				return 0;
 			}
+			else if (CLOCK_GPS == clk_id)
+			{
+				errno = EINVAL;
+				return -1;
+			}
 		}
 	}
 	return pclock_gettime(clk_id, tp);
 }
 
-#ifdef __GNUC__
+#ifdef _GNU_SOURCE
 int clock_gettime(clockid_t clk_id, struct timespec *tp) __attribute__ ((weak, alias ("nmea_gettime")));
 #endif

@@ -14,6 +14,9 @@
 #define __NMEA_TIME_H__
 
 #include "config.h"
+#include <time.h>
+
+#define CLOCK_GPS 17
 
 #ifdef  __cplusplus
 extern "C" {
@@ -39,6 +42,11 @@ typedef struct _nmeaTIME
  * \brief Get time now to nmeaTIME structure
  */
 void nmea_time_now(nmeaTIME *t);
+
+/**
+ * \brief Get time from GPS
+ */
+int nmea_gettime(clockid_t clk_id, struct timespec *tp);
 
 #ifdef  __cplusplus
 }
