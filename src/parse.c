@@ -383,6 +383,7 @@ void nmea_GPGGA2info(nmeaGPGGA *pack, nmeaINFO *info)
     info->utc.min = pack->utc.min;
     info->utc.sec = pack->utc.sec;
     info->utc.hsec = pack->utc.hsec;
+    info->satinfo.inuse = pack->satinuse;
     info->sig = pack->sig;
     info->HDOP = pack->HDOP;
     info->elv = pack->elv;
