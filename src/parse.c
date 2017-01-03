@@ -105,6 +105,7 @@ int nmea_pack_type(const char *buff, int buff_sz)
         "GPGSV",
         "GPRMC",
         "GPVTG",
+        "GPZDA",
     };
 
     NMEA_ASSERT(buff);
@@ -121,6 +122,8 @@ int nmea_pack_type(const char *buff, int buff_sz)
         return GPRMC;
     else if(0 == memcmp(buff, pheads[4], 5))
         return GPVTG;
+    else if(0 == memcmp(buff, pheads[5], 5))
+        return GPZDA;
 
     return GPNON;
 }
@@ -364,6 +367,43 @@ int nmea_parse_GPVTG(const char *buff, int buff_sz, nmeaGPVTG *pack)
         pack->spk_k != 'K')
     {
         nmea_error("GPVTG parse error (format error)!");
+        return 0;
+    }
+
+    return 1;
+}
+
+/**
+ * \brief Parse ZDA packet from buffer.
+ * @param buff a constant character pointer of packet buffer.
+ * @param buff_sz buffer size.
+ * @param pack a pointer of packet which will filled by function.
+ * @return 1 (true) - if parsed successfully or 0 (false) - if fail.
+ */
+int nmea_parse_GPZDA(const char *buff, int buff_sz, nmeaGPZDA *pack)
+{
+    char time_buff[NMEA_TIMEPARSE_BUF];
+    int unknown;
+
+    NMEA_ASSERT(buff && pack);
+
+    memset(pack, 0, sizeof(nmeaGPZDA));
+
+    nmea_trace_buff(buff, buff_sz);
+
+    if(6 != nmea_scanf(buff, buff_sz,
+        "$GPZDA,%s,%2d,%2d,%4d,%2d,%2d*",
+        &(time_buff[0]),
+        &(pack->utc.day), &(pack->utc.mon), &(pack->utc.year),
+        &(unknown), &(unknown)))
+    {
+        nmea_error("GPZDA parse error!");
+        return 0;
+    }
+
+    if(0 != _nmea_parse_time(&time_buff[0], (int)strlen(&time_buff[0]), &(pack->utc)))
+    {
+        nmea_error("GPZDA time parse error!");
         return 0;
     }
 

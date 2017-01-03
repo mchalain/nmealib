@@ -29,7 +29,8 @@ enum nmeaPACKTYPE
     GPGSA   = 0x0002,   /**< GSA - GPS receiver operating mode, SVs used for navigation, and DOP values. */
     GPGSV   = 0x0004,   /**< GSV - Number of SVs in view, PRN numbers, elevation, azimuth & SNR values. */
     GPRMC   = 0x0008,   /**< RMC - Recommended Minimum Specific GPS/TRANSIT Data. */
-    GPVTG   = 0x0010    /**< VTG - Actual track made good and speed over ground. */
+    GPVTG   = 0x0010,   /**< VTG - Actual track made good and speed over ground. */
+    GPZDA   = 0x0020    /**< ZDA - Time and Datae just after 1PPS pulse. */
 };
 
 /**
@@ -114,6 +115,15 @@ typedef struct _nmeaGPVTG
     char    spk_k;      /**< Fixed text 'K' indicates that speed over ground is in kilometers/hour */
 
 } nmeaGPVTG;
+
+/**
+ * ZDA packet information structure (Recommended Minimum sentence C)
+ */
+typedef struct _nmeaGPZDA
+{
+    nmeaTIME utc;       /**< UTC of position */
+
+} nmeaGPZDA;
 
 void nmea_zero_GPGGA(nmeaGPGGA *pack);
 void nmea_zero_GPGSA(nmeaGPGSA *pack);

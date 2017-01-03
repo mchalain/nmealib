@@ -231,6 +231,18 @@ int nmea_parser_real_push(nmeaPARSER *parser, const char *buff, int buff_sz)
                     node = 0;
                 }
                 break;
+            case GPZDA:
+                if(0 == (node->pack = malloc(sizeof(nmeaGPZDA))))
+                    goto mem_fail;
+                node->packType = GPZDA;
+                if(!nmea_parse_GPZDA(
+                    (const char *)parser->buffer + nparsed,
+                    sen_sz, (nmeaGPZDA *)node->pack))
+                {
+                    free(node);
+                    node = 0;
+                }
+                break;
             default:
                 free(node);
                 node = 0;
