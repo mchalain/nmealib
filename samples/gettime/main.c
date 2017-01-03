@@ -13,6 +13,9 @@ int main()
 {
 	struct timespec ts;
 	struct tm *tm;
+
+	do
+	{
 #ifdef _GNU_SOURCE
 	clock_gettime(CLOCK_REALTIME, &ts);
 #else
@@ -26,5 +29,7 @@ int main()
 		tm->tm_hour,
 		tm->tm_min,
 		tm->tm_sec);
+	sleep(1);
+	} while(1);
 	return 0;
 }
