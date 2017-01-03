@@ -122,6 +122,8 @@ typedef struct _nmeaGPVTG
 typedef struct _nmeaGPZDA
 {
     nmeaTIME utc;       /**< UTC of position */
+    int lz_hour; /**< Local zone hour - Offset from UTC */
+    int lz_min; /**< Local zone minutes - Offset from UTC */
 
 } nmeaGPZDA;
 

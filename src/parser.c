@@ -108,6 +108,9 @@ int nmea_parse(
         case GPVTG:
             nmea_GPVTG2info((nmeaGPVTG *)pack, info);
             break;
+        case GPZDA:
+            nmea_GPZDA2info((nmeaGPZDA *)pack, info);
+            break;
         };
 
         free(pack);

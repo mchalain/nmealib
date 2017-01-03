@@ -383,7 +383,6 @@ int nmea_parse_GPVTG(const char *buff, int buff_sz, nmeaGPVTG *pack)
 int nmea_parse_GPZDA(const char *buff, int buff_sz, nmeaGPZDA *pack)
 {
     char time_buff[NMEA_TIMEPARSE_BUF];
-    int unknown;
 
     NMEA_ASSERT(buff && pack);
 
@@ -395,7 +394,7 @@ int nmea_parse_GPZDA(const char *buff, int buff_sz, nmeaGPZDA *pack)
         "$GPZDA,%s,%2d,%2d,%4d,%2d,%2d*",
         &(time_buff[0]),
         &(pack->utc.day), &(pack->utc.mon), &(pack->utc.year),
-        &(unknown), &(unknown)))
+        &(pack->lz_hour), &(pack->lz_min)))
     {
         nmea_error("GPZDA parse error!");
         return 0;
@@ -542,4 +541,20 @@ void nmea_GPVTG2info(nmeaGPVTG *pack, nmeaINFO *info)
     info->declination = pack->dec;
     info->speed = pack->spk;
     info->smask |= GPVTG;
+}
+
+/**
+ * \brief Fill nmeaINFO structure by ZDA packet data.
+ * @param pack a pointer of packet structure.
+ * @param info a pointer of summary information structure.
+ */
+void nmea_GPZDA2info(nmeaGPZDA *pack, nmeaINFO *info)
+{
+    NMEA_ASSERT(pack && info);
+
+    info->utc.hour = pack->utc.hour;
+    info->utc.min = pack->utc.min;
+    info->utc.sec = pack->utc.sec;
+    info->utc.hsec = pack->utc.hsec;
+    info->smask |= GPZDA;
 }
