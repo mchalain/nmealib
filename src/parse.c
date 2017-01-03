@@ -153,7 +153,10 @@ int nmea_find_tail(const char *buff, int buff_sz, int *res_crc)
         }
         else if('*' == *buff)
         {
-            if(buff + tail_sz <= end_buff && '\r' == buff[3] && '\n' == buff[4])
+            /*
+             * some GPS doesn't return strict nmea sentences and the end of line is not strictly \r\n
+             */
+            if(buff + tail_sz <= end_buff && ('\r' == buff[3] || '\n' == buff[3]))
             {
                 *res_crc = nmea_atoi(buff + 1, 2, 16);
                 nread = buff_sz - (int)(end_buff - (buff + tail_sz));
