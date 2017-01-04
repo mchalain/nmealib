@@ -77,6 +77,7 @@ void nmea_time_now(nmeaTIME *stm)
 
 static int nmea_gpsfd = -1;
 static nmeaPARSER nmea_parser;
+static nmeaINFO nmea_info;
 static int (*pclock_gettime)(clockid_t, struct timespec *);
 
 __attribute__((constructor)) void nmea_init()
@@ -89,8 +90,10 @@ __attribute__((constructor)) void nmea_init()
 		devicename = (char *)defaultdevicename;
 
 	nmea_gpsfd = open(devicename, O_RDONLY);
-	if (nmea_gpsfd > 2 )
+	if (nmea_gpsfd > 2 ) {
 		nmea_parser_init(&nmea_parser);
+		nmea_zero_INFO(&nmea_info);
+	}
 
 #ifdef _GNU_SOURCE
 	pclock_gettime = (int (*)(clockid_t, struct timespec *))dlsym(RTLD_NEXT, "clock_gettime");
@@ -115,21 +118,19 @@ int nmea_gettime(clockid_t clk_id, struct timespec *tp)
 		size = read(nmea_gpsfd, buff, size);
 		if (size > 0)
 		{
-			nmeaINFO info;
-			nmea_zero_INFO(&info);
-			nmea_parse(&nmea_parser, &buff[0], size, &info);
+			nmea_parse(&nmea_parser, &buff[0], size, &nmea_info);
 
-			if (info.satinfo.inuse > 3)
+			if (nmea_info.satinfo.inuse > 3)
 			{
 				struct tm gpstime;
-				gpstime.tm_year = info.utc.year;
-				gpstime.tm_mon = info.utc.mon;
-				gpstime.tm_mday = info.utc.day;
-				gpstime.tm_hour = info.utc.hour;
-				gpstime.tm_min = info.utc.min;
-				gpstime.tm_sec = info.utc.sec;
+				gpstime.tm_year = nmea_info.utc.year;
+				gpstime.tm_mon = nmea_info.utc.mon;
+				gpstime.tm_mday = nmea_info.utc.day;
+				gpstime.tm_hour = nmea_info.utc.hour;
+				gpstime.tm_min = nmea_info.utc.min;
+				gpstime.tm_sec = nmea_info.utc.sec;
 				tp->tv_sec = mktime(&gpstime);
-				tp->tv_nsec = info.utc.hsec * 10000000;
+				tp->tv_nsec = nmea_info.utc.hsec * 10000000;
 				return 0;
 			}
 			else if (CLOCK_GPS == clk_id)
