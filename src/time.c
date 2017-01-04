@@ -108,19 +108,34 @@ __attribute__((destructor)) void nmea_deinit()
 		close(nmea_gpsfd);
 }
 
+static void _nmea_readdatetime(nmeaINFO *info, int satinuse)
+{
+	int size = 100;
+	char buff[101];
+
+	do {
+		size = read(nmea_gpsfd, buff, size);
+		if (size > 0)
+		{
+			nmea_parse(&nmea_parser, &buff[0], size, info);
+		}
+		else if (errno != EINTR && errno != EAGAIN)
+		{
+			close(nmea_gpsfd);
+			nmea_gpsfd = -1;
+			break;
+		}
+		else if (satinuse < 0)
+			break;
+	} while (!(info->smask & (GPZDA | GPGGA | GPRMC)));
+}
+
 int nmea_gettime(clockid_t clk_id, struct timespec *tp)
 {
 	if ((CLOCK_GPS == clk_id || CLOCK_REALTIME == clk_id) && nmea_gpsfd > 2)
 	{
-		int size = 100;
-		char buff[101];
-
-		size = read(nmea_gpsfd, buff, size);
-		if (size > 0)
-		{
-			nmea_parse(&nmea_parser, &buff[0], size, &nmea_info);
-
-			if (nmea_info.satinfo.inuse > 3)
+		_nmea_readdatetime(&nmea_info, 3);
+			if (nmea_info.satinfo.inuse > 2)
 			{
 				struct tm gpstime;
 				gpstime.tm_year = nmea_info.utc.year;
@@ -131,6 +146,7 @@ int nmea_gettime(clockid_t clk_id, struct timespec *tp)
 				gpstime.tm_sec = nmea_info.utc.sec;
 				tp->tv_sec = mktime(&gpstime);
 				tp->tv_nsec = nmea_info.utc.hsec * 10000000;
+				nmea_info.smask &= ~(GPZDA | GPGGA | GPRMC);
 				return 0;
 			}
 			else if (CLOCK_GPS == clk_id)
@@ -138,7 +154,6 @@ int nmea_gettime(clockid_t clk_id, struct timespec *tp)
 				errno = EINVAL;
 				return -1;
 			}
-		}
 	}
 	return pclock_gettime(clk_id, tp);
 }
