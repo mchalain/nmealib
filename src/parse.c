@@ -105,6 +105,7 @@ int nmea_pack_type(const char *buff, int buff_sz)
         "GPGSV",
         "GPRMC",
         "GPVTG",
+        "GPZDA",
     };
 
     NMEA_ASSERT(buff);
@@ -121,6 +122,8 @@ int nmea_pack_type(const char *buff, int buff_sz)
         return GPRMC;
     else if(0 == memcmp(buff, pheads[4], 5))
         return GPVTG;
+    else if(0 == memcmp(buff, pheads[5], 5))
+        return GPZDA;
 
     return GPNON;
 }
@@ -371,6 +374,45 @@ int nmea_parse_GPVTG(const char *buff, int buff_sz, nmeaGPVTG *pack)
 }
 
 /**
+ * \brief Parse ZDA packet from buffer.
+ * @param buff a constant character pointer of packet buffer.
+ * @param buff_sz buffer size.
+ * @param pack a pointer of packet which will filled by function.
+ * @return 1 (true) - if parsed successfully or 0 (false) - if fail.
+ */
+int nmea_parse_GPZDA(const char *buff, int buff_sz, nmeaGPZDA *pack)
+{
+    int nsen;
+    char time_buff[NMEA_TIMEPARSE_BUF];
+
+    NMEA_ASSERT(buff && pack);
+
+    memset(pack, 0, sizeof(nmeaGPZDA));
+
+    nmea_trace_buff(buff, buff_sz);
+
+    nsen = nmea_scanf(buff, buff_sz,
+        "$GPZDA,%s,%2d,%2d,%4d,%2d,%2d*",
+        &(time_buff[0]),
+        &(pack->utc.day), &(pack->utc.mon), &(pack->utc.year),
+        &(pack->lz_hour), &(pack->lz_min));
+
+    if(6 != nsen && 5 != nsen)
+    {
+        nmea_error("GPZDA parse error!");
+        return 0;
+    }
+
+    if(0 != _nmea_parse_time(&time_buff[0], (int)strlen(&time_buff[0]), &(pack->utc)))
+    {
+        nmea_error("GPZDA time parse error!");
+        return 0;
+    }
+
+    return 1;
+}
+
+/**
  * \brief Fill nmeaINFO structure by GGA packet data.
  * @param pack a pointer of packet structure.
  * @param info a pointer of summary information structure.
@@ -502,4 +544,20 @@ void nmea_GPVTG2info(nmeaGPVTG *pack, nmeaINFO *info)
     info->declination = pack->dec;
     info->speed = pack->spk;
     info->smask |= GPVTG;
+}
+
+/**
+ * \brief Fill nmeaINFO structure by ZDA packet data.
+ * @param pack a pointer of packet structure.
+ * @param info a pointer of summary information structure.
+ */
+void nmea_GPZDA2info(nmeaGPZDA *pack, nmeaINFO *info)
+{
+    NMEA_ASSERT(pack && info);
+
+    info->utc.hour = pack->utc.hour;
+    info->utc.min = pack->utc.min;
+    info->utc.sec = pack->utc.sec;
+    info->utc.hsec = pack->utc.hsec;
+    info->smask |= GPZDA;
 }
