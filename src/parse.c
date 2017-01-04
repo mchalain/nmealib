@@ -382,6 +382,7 @@ int nmea_parse_GPVTG(const char *buff, int buff_sz, nmeaGPVTG *pack)
  */
 int nmea_parse_GPZDA(const char *buff, int buff_sz, nmeaGPZDA *pack)
 {
+    int nsen;
     char time_buff[NMEA_TIMEPARSE_BUF];
 
     NMEA_ASSERT(buff && pack);
@@ -390,12 +391,15 @@ int nmea_parse_GPZDA(const char *buff, int buff_sz, nmeaGPZDA *pack)
 
     nmea_trace_buff(buff, buff_sz);
 
-    if(6 != nmea_scanf(buff, buff_sz,
+    nsen = nmea_scanf(buff, buff_sz,
         "$GPZDA,%s,%2d,%2d,%4d,%2d,%2d*",
         &(time_buff[0]),
         &(pack->utc.day), &(pack->utc.mon), &(pack->utc.year),
-        &(pack->lz_hour), &(pack->lz_min)))
+        &(pack->lz_hour), &(pack->lz_min));
+
+    if(6 != nsen && 5 != nsen)
     {
+        printf("GPZDA parse error!");
         nmea_error("GPZDA parse error!");
         return 0;
     }
