@@ -108,7 +108,8 @@ __attribute__((constructor)) void nmea_init()
 		devicename = (char *)defaultdevicename;
 
 	nmea_gpsfd = open(devicename, O_RDONLY);
-	if (nmea_gpsfd > 2 ) {
+	if (nmea_gpsfd > 2 )
+	{
 		nmea_parser_init(&nmea_parser);
 		nmea_zero_INFO(&nmea_info);
 
@@ -150,7 +151,8 @@ static void _nmea_readdatetime(nmeaINFO *info, struct timespec *tp, int satinuse
 	int size = 100;
 	char buff[101];
 
-	do {
+	do
+	{
 		size = read(nmea_gpsfd, buff, size);
 		if (size > 0)
 		{
@@ -158,12 +160,19 @@ static void _nmea_readdatetime(nmeaINFO *info, struct timespec *tp, int satinuse
 			if (nmea_info.satinfo.inuse > satinuse)
 			{
 				struct tm gpstime;
+
 				gpstime.tm_year = nmea_info.utc.year;
 				gpstime.tm_mon = nmea_info.utc.mon;
 				gpstime.tm_mday = nmea_info.utc.day;
 				gpstime.tm_hour = nmea_info.utc.hour;
 				gpstime.tm_min = nmea_info.utc.min;
 				gpstime.tm_sec = nmea_info.utc.sec;
+				gpstime.tm_isdst = 0;
+				/*
+				 * mktime espects a local time and not UTC
+				 * timezone is the global variable from <time.h>
+				 */
+				gpstime.tm_hour -= (timezone / 3600);
 				tp->tv_sec = mktime(&gpstime);
 				tp->tv_nsec = nmea_info.utc.hsec * 10000000;
 			}
