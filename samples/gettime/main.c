@@ -22,13 +22,14 @@ int main()
 	nmea_gettime(CLOCK_GPS, &ts);
 #endif
 	tm = gmtime(&ts.tv_sec);
-	printf("date : %02d/%02d/%04d %02d:%02d:%02d\n",
+	printf("date : %02d/%02d/%04d %02d:%02d:%02d %d\n",
 		tm->tm_mday,
 		tm->tm_mon + 1,
 		tm->tm_year + 1900,
 		tm->tm_hour,
 		tm->tm_min,
-		tm->tm_sec);
+		tm->tm_sec,
+		ts.tv_nsec);
 	sleep(1);
 	} while(1);
 	return 0;
