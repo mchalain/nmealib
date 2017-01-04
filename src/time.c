@@ -81,6 +81,7 @@ static int nmea_gpsfd = -1;
 static nmeaPARSER nmea_parser;
 static nmeaINFO nmea_info;
 static struct timespec nmea_tp;
+static struct timespec nmea_deltatp = {0, 0};
 static int (*pclock_gettime)(clockid_t, struct timespec *);
 static pthread_t nmea_pthread;
 static pthread_attr_t nmea_attr;
@@ -175,6 +176,10 @@ static void _nmea_readdatetime(nmeaINFO *info, struct timespec *tp, int satinuse
 				gpstime.tm_hour -= (timezone / 3600);
 				tp->tv_sec = mktime(&gpstime);
 				tp->tv_nsec = nmea_info.utc.hsec * 10000000;
+				if (info->smask & GPZDA) {
+					pclock_gettime(CLOCK_REALTIME, &nmea_deltatp);
+					nmea_info.smask &= ~GPZDA;
+				}
 			}
 		}
 		else if ((errno != EINTR || nmea_thread_running) && errno != EAGAIN)
@@ -194,8 +199,18 @@ int nmea_gettime(clockid_t clk_id, struct timespec *tp)
 			_nmea_readdatetime(&nmea_info, &nmea_tp, 2);
 		if (nmea_info.satinfo.inuse > 2)
 		{
-			tp->tv_sec = nmea_tp.tv_sec;
-			tp->tv_nsec = nmea_tp.tv_nsec;
+			struct timespec now = {0, 0};
+			if (nmea_deltatp.tv_sec > 0)
+			{
+				pclock_gettime(CLOCK_REALTIME, &now);
+				now.tv_sec -= nmea_deltatp.tv_sec;
+				now.tv_nsec -= nmea_deltatp.tv_nsec;
+				now.tv_nsec += now.tv_sec * 1000000000;
+			}
+			if (now.tv_nsec < 0)
+				printf("nmea_deltatp %d:%d now %d:%d\n", nmea_deltatp.tv_sec, nmea_deltatp.tv_nsec, now.tv_sec, now.tv_nsec);
+			tp->tv_sec = nmea_tp.tv_sec + now.tv_sec;
+			tp->tv_nsec = nmea_tp.tv_nsec + now.tv_nsec;
 			nmea_info.smask &= ~(GPZDA | GPGGA | GPRMC);
 			return 0;
 		}
