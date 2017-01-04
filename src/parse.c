@@ -106,6 +106,7 @@ int nmea_pack_type(const char *buff, int buff_sz)
         "GPRMC",
         "GPVTG",
         "GPZDA",
+        "GPGLL",
     };
 
     NMEA_ASSERT(buff);
@@ -124,6 +125,8 @@ int nmea_pack_type(const char *buff, int buff_sz)
         return GPVTG;
     else if(0 == memcmp(buff, pheads[5], 5))
         return GPZDA;
+    else if(0 == memcmp(buff, pheads[6], 5))
+        return GPGLL;
 
     return GPNON;
 }
@@ -413,6 +416,45 @@ int nmea_parse_GPZDA(const char *buff, int buff_sz, nmeaGPZDA *pack)
 }
 
 /**
+ * \brief Parse GLL packet from buffer.
+ * @param buff a constant character pointer of packet buffer.
+ * @param buff_sz buffer size.
+ * @param pack a pointer of packet which will filled by function.
+ * @return 1 (true) - if parsed successfully or 0 (false) - if fail.
+ */
+int nmea_parse_GPGLL(const char *buff, int buff_sz, nmeaGPGLL *pack)
+{
+    int nsen;
+    char time_buff[NMEA_TIMEPARSE_BUF];
+
+    NMEA_ASSERT(buff && pack);
+
+    memset(pack, 0, sizeof(nmeaGPGLL));
+
+    nmea_trace_buff(buff, buff_sz);
+
+    nsen = nmea_scanf(buff, buff_sz,
+        "$GPGLL,%f,%C,%f,%C,%s,%C,%C*",
+        &(pack->lat), &(pack->ns), &(pack->lon), &(pack->ew),
+        &(time_buff[0]),
+        &(pack->status), &(pack->mode));
+
+    if(7 != nsen)
+    {
+        nmea_error("GPGLL parse error!");
+        return 0;
+    }
+
+    if(0 != _nmea_parse_time(&time_buff[0], (int)strlen(&time_buff[0]), &(pack->utc)))
+    {
+        nmea_error("GPGLL time parse error!");
+        return 0;
+    }
+
+    return 1;
+}
+
+/**
  * \brief Fill nmeaINFO structure by GGA packet data.
  * @param pack a pointer of packet structure.
  * @param info a pointer of summary information structure.
@@ -560,4 +602,36 @@ void nmea_GPZDA2info(nmeaGPZDA *pack, nmeaINFO *info)
     info->utc.sec = pack->utc.sec;
     info->utc.hsec = pack->utc.hsec;
     info->smask |= GPZDA;
+}
+
+/**
+ * \brief Fill nmeaINFO structure by GLL packet data.
+ * @param pack a pointer of packet structure.
+ * @param info a pointer of summary information structure.
+ */
+void nmea_GPGLL2info(nmeaGPGLL *pack, nmeaINFO *info)
+{
+    NMEA_ASSERT(pack && info);
+
+    if('A' == pack->status)
+    {
+        if(NMEA_SIG_BAD == info->sig)
+            info->sig = NMEA_SIG_MID;
+        if(NMEA_FIX_BAD == info->fix)
+            info->fix = NMEA_FIX_2D;
+    }
+    else if('V' == pack->status)
+    {
+        info->sig = NMEA_SIG_BAD;
+        info->fix = NMEA_FIX_BAD;
+    }
+
+    info->utc.hour = pack->utc.hour;
+    info->utc.min = pack->utc.min;
+    info->utc.sec = pack->utc.sec;
+    info->utc.hsec = pack->utc.hsec;
+    info->lat = ((pack->ns == 'N')?pack->lat:-(pack->lat));
+    info->lon = ((pack->ew == 'E')?pack->lon:-(pack->lon));
+    info->smask |= GPGLL;
+    printf("GLL\n");
 }

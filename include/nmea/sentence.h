@@ -30,7 +30,8 @@ enum nmeaPACKTYPE
     GPGSV   = 0x0004,   /**< GSV - Number of SVs in view, PRN numbers, elevation, azimuth & SNR values. */
     GPRMC   = 0x0008,   /**< RMC - Recommended Minimum Specific GPS/TRANSIT Data. */
     GPVTG   = 0x0010,   /**< VTG - Actual track made good and speed over ground. */
-    GPZDA   = 0x0020    /**< ZDA - Time and Datae just after 1PPS pulse. */
+    GPZDA   = 0x0020,   /**< ZDA - Time and Datae just after 1PPS pulse. */
+    GPGLL   = 0x0040    /**< GLL - Geographic Position-Latitude/Longitude . */
 };
 
 /**
@@ -127,12 +128,28 @@ typedef struct _nmeaGPZDA
 
 } nmeaGPZDA;
 
+/**
+ * GLL packet information structure (Recommended Minimum sentence C)
+ */
+typedef struct _nmeaGPGLL
+{
+	double  lat;        /**< Latitude in NDEG - [degree][min].[sec/60] */
+    char    ns;         /**< [N]orth or [S]outh */
+	double  lon;        /**< Longitude in NDEG - [degree][min].[sec/60] */
+    char    ew;         /**< [E]ast or [W]est */
+    nmeaTIME utc;       /**< UTC of position */
+    char    status;     /**< Status (A = active or V = void) */
+    char    mode;       /**< Mode indicator of fix type (A = autonomous, D = differential, E = estimated, N = not valid, S = simulator) */
+
+} nmeaGPGLL;
+
 void nmea_zero_GPGGA(nmeaGPGGA *pack);
 void nmea_zero_GPGSA(nmeaGPGSA *pack);
 void nmea_zero_GPGSV(nmeaGPGSV *pack);
 void nmea_zero_GPRMC(nmeaGPRMC *pack);
 void nmea_zero_GPVTG(nmeaGPVTG *pack);
 void nmea_zero_GPZDA(nmeaGPZDA *pack);
+void nmea_zero_GPGLL(nmeaGPGLL *pack);
 
 #ifdef  __cplusplus
 }

@@ -111,6 +111,9 @@ int nmea_parse(
         case GPZDA:
             nmea_GPZDA2info((nmeaGPZDA *)pack, info);
             break;
+        case GPGLL:
+            nmea_GPGLL2info((nmeaGPGLL *)pack, info);
+            break;
         };
 
         free(pack);
@@ -241,6 +244,18 @@ int nmea_parser_real_push(nmeaPARSER *parser, const char *buff, int buff_sz)
                 if(!nmea_parse_GPZDA(
                     (const char *)parser->buffer + nparsed,
                     sen_sz, (nmeaGPZDA *)node->pack))
+                {
+                    free(node);
+                    node = 0;
+                }
+                break;
+            case GPGLL:
+                if(0 == (node->pack = malloc(sizeof(nmeaGPGLL))))
+                    goto mem_fail;
+                node->packType = GPGLL;
+                if(!nmea_parse_GPGLL(
+                    (const char *)parser->buffer + nparsed,
+                    sen_sz, (nmeaGPGLL *)node->pack))
                 {
                     free(node);
                     node = 0;

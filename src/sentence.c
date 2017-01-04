@@ -58,3 +58,11 @@ void nmea_zero_GPZDA(nmeaGPZDA *pack)
     memset(pack, 0, sizeof(nmeaGPZDA));
     nmea_time_now(&pack->utc);
 }
+
+void nmea_zero_GPGLL(nmeaGPGLL *pack)
+{
+    memset(pack, 0, sizeof(nmeaGPGLL));
+    nmea_time_now(&pack->utc);
+    pack->status = 'V';
+    pack->ns = 'N';
+}
