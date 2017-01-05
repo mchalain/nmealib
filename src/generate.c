@@ -17,34 +17,37 @@
 #include <stdlib.h>
 #include <math.h>
 
-int nmea_gen_GPGGA(char *buff, int buff_sz, nmeaGPGGA *pack)
+int nmea_gen_GGA(char *buff, int buff_sz, nmeaPACKTALKER talker, nmeaGGA *pack)
 {
     return nmea_printf(buff, buff_sz,
-        "$GPGGA,%02d%02d%02d.%02d,%07.4f,%C,%07.4f,%C,%1d,%02d,%03.1f,%03.1f,%C,%03.1f,%C,%03.1f,%04d",
+        "$%2sGGA,%02d%02d%02d.%02d,%07.4f,%C,%07.4f,%C,%1d,%02d,%03.1f,%03.1f,%C,%03.1f,%C,%03.1f,%04d",
+        nmeaTalkers[talker],
         pack->utc.hour, pack->utc.min, pack->utc.sec, pack->utc.hsec,
         pack->lat, pack->ns, pack->lon, pack->ew,
         pack->sig, pack->satinuse, pack->HDOP, pack->elv, pack->elv_units,
         pack->diff, pack->diff_units, pack->dgps_age, pack->dgps_sid);
 }
 
-int nmea_gen_GPGSA(char *buff, int buff_sz, nmeaGPGSA *pack)
+int nmea_gen_GSA(char *buff, int buff_sz, nmeaPACKTALKER talker, nmeaGSA *pack)
 {
     return nmea_printf(buff, buff_sz,
-        "$GPGSA,%C,%1d,%02d,%02d,%02d,%02d,%02d,%02d,%02d,%02d,%02d,%02d,%02d,%02d,%03.1f,%03.1f,%03.1f",
+        "$%2sGSA,%C,%1d,%02d,%02d,%02d,%02d,%02d,%02d,%02d,%02d,%02d,%02d,%02d,%02d,%03.1f,%03.1f,%03.1f",
+        nmeaTalkers[talker],
         pack->fix_mode, pack->fix_type,
         pack->sat_prn[0], pack->sat_prn[1], pack->sat_prn[2], pack->sat_prn[3], pack->sat_prn[4], pack->sat_prn[5],
         pack->sat_prn[6], pack->sat_prn[7], pack->sat_prn[8], pack->sat_prn[9], pack->sat_prn[10], pack->sat_prn[11],
         pack->PDOP, pack->HDOP, pack->VDOP);
 }
 
-int nmea_gen_GPGSV(char *buff, int buff_sz, nmeaGPGSV *pack)
+int nmea_gen_GSV(char *buff, int buff_sz, nmeaPACKTALKER talker, nmeaGSV *pack)
 {
     return nmea_printf(buff, buff_sz,
-        "$GPGSV,%1d,%1d,%02d,"
+        "$%2sGSV,%1d,%1d,%02d,"
         "%02d,%02d,%03d,%02d,"
         "%02d,%02d,%03d,%02d,"
         "%02d,%02d,%03d,%02d,"
         "%02d,%02d,%03d,%02d",
+        nmeaTalkers[talker],
         pack->pack_count, pack->pack_index + 1, pack->sat_count,
         pack->sat_data[0].id, pack->sat_data[0].elv, pack->sat_data[0].azimuth, pack->sat_data[0].sig,
         pack->sat_data[1].id, pack->sat_data[1].elv, pack->sat_data[1].azimuth, pack->sat_data[1].sig,
@@ -52,10 +55,11 @@ int nmea_gen_GPGSV(char *buff, int buff_sz, nmeaGPGSV *pack)
         pack->sat_data[3].id, pack->sat_data[3].elv, pack->sat_data[3].azimuth, pack->sat_data[3].sig);
 }
 
-int nmea_gen_GPRMC(char *buff, int buff_sz, nmeaGPRMC *pack)
+int nmea_gen_RMC(char *buff, int buff_sz, nmeaPACKTALKER talker, nmeaRMC *pack)
 {
     return nmea_printf(buff, buff_sz,
-        "$GPRMC,%02d%02d%02d.%02d,%C,%07.4f,%C,%07.4f,%C,%03.1f,%03.1f,%02d%02d%02d,%03.1f,%C,%C",
+        "$%2sRMC,%02d%02d%02d.%02d,%C,%07.4f,%C,%07.4f,%C,%03.1f,%03.1f,%02d%02d%02d,%03.1f,%C,%C",
+        nmeaTalkers[talker],
         pack->utc.hour, pack->utc.min, pack->utc.sec, pack->utc.hsec,
         pack->status, pack->lat, pack->ns, pack->lon, pack->ew,
         pack->speed, pack->direction,
@@ -63,19 +67,20 @@ int nmea_gen_GPRMC(char *buff, int buff_sz, nmeaGPRMC *pack)
         pack->declination, pack->declin_ew, pack->mode);
 }
 
-int nmea_gen_GPVTG(char *buff, int buff_sz, nmeaGPVTG *pack)
+int nmea_gen_VTG(char *buff, int buff_sz, nmeaPACKTALKER talker, nmeaVTG *pack)
 {
     return nmea_printf(buff, buff_sz,
-        "$GPVTG,%.1f,%C,%.1f,%C,%.1f,%C,%.1f,%C",
+        "$%2sVTG,%.1f,%C,%.1f,%C,%.1f,%C,%.1f,%C",
+        nmeaTalkers[talker],
         pack->dir, pack->dir_t,
         pack->dec, pack->dec_m,
         pack->spn, pack->spn_n,
         pack->spk, pack->spk_k);
 }
 
-void nmea_info2GPGGA(const nmeaINFO *info, nmeaGPGGA *pack)
+void nmea_info2GGA(const nmeaINFO *info, nmeaGGA *pack)
 {
-    nmea_zero_GPGGA(pack);
+    nmea_zero_GGA(pack);
 
     pack->utc = info->utc;
     pack->lat = fabs(info->lat);
@@ -88,11 +93,11 @@ void nmea_info2GPGGA(const nmeaINFO *info, nmeaGPGGA *pack)
     pack->elv = info->elv;
 }
 
-void nmea_info2GPGSA(const nmeaINFO *info, nmeaGPGSA *pack)
+void nmea_info2GSA(const nmeaINFO *info, nmeaGSA *pack)
 {
     int it;
 
-    nmea_zero_GPGSA(pack);
+    nmea_zero_GSA(pack);
 
     pack->fix_type = info->fix;
     pack->PDOP = info->PDOP;
@@ -116,11 +121,11 @@ int nmea_gsv_npack(int sat_count)
     return pack_count;
 }
 
-void nmea_info2GPGSV(const nmeaINFO *info, nmeaGPGSV *pack, int pack_idx)
+void nmea_info2GSV(const nmeaINFO *info, nmeaGSV *pack, int pack_idx)
 {
     int sit, pit;
 
-    nmea_zero_GPGSV(pack);
+    nmea_zero_GSV(pack);
 
     pack->sat_count = (info->satinfo.inview <= NMEA_MAXSAT)?info->satinfo.inview:NMEA_MAXSAT;
     pack->pack_count = nmea_gsv_npack(pack->sat_count);
@@ -137,9 +142,9 @@ void nmea_info2GPGSV(const nmeaINFO *info, nmeaGPGSV *pack, int pack_idx)
         pack->sat_data[pit] = info->satinfo.sat[sit];
 }
 
-void nmea_info2GPRMC(const nmeaINFO *info, nmeaGPRMC *pack)
+void nmea_info2RMC(const nmeaINFO *info, nmeaRMC *pack)
 {
-    nmea_zero_GPRMC(pack);
+    nmea_zero_RMC(pack);
 
     pack->utc = info->utc;
     pack->status = ((info->sig > 0)?'A':'V');
@@ -154,9 +159,9 @@ void nmea_info2GPRMC(const nmeaINFO *info, nmeaGPRMC *pack)
     pack->mode = ((info->sig > 0)?'A':'N');
 }
 
-void nmea_info2GPVTG(const nmeaINFO *info, nmeaGPVTG *pack)
+void nmea_info2VTG(const nmeaINFO *info, nmeaVTG *pack)
 {
-    nmea_zero_GPVTG(pack);
+    nmea_zero_VTG(pack);
 
     pack->dir = info->direction;
     pack->dec = info->declination;
@@ -172,51 +177,52 @@ int nmea_generate(
 {
     int gen_count = 0, gsv_it, gsv_count;
     int pack_mask = generate_mask;
+    int talker = TK_GP;
 
-    nmeaGPGGA gga;
-    nmeaGPGSA gsa;
-    nmeaGPGSV gsv;
-    nmeaGPRMC rmc;
-    nmeaGPVTG vtg;
+    nmeaGGA gga;
+    nmeaGSA gsa;
+    nmeaGSV gsv;
+    nmeaRMC rmc;
+    nmeaVTG vtg;
 
     if(!buff)
         return 0;
 
     while(pack_mask)
     {
-        if(pack_mask & GPGGA)
+        if(pack_mask & TP_GGA)
         {
-            nmea_info2GPGGA(info, &gga);
-            gen_count += nmea_gen_GPGGA(buff + gen_count, buff_sz - gen_count, &gga);
-            pack_mask &= ~GPGGA;
+            nmea_info2GGA(info, &gga);
+            gen_count += nmea_gen_GGA(buff + gen_count, buff_sz - gen_count, talker, &gga);
+            pack_mask &= ~TP_GGA;
         }
-        else if(pack_mask & GPGSA)
+        else if(pack_mask & TP_GSA)
         {
-            nmea_info2GPGSA(info, &gsa);
-            gen_count += nmea_gen_GPGSA(buff + gen_count, buff_sz - gen_count, &gsa);
-            pack_mask &= ~GPGSA;
+            nmea_info2GSA(info, &gsa);
+            gen_count += nmea_gen_GSA(buff + gen_count, buff_sz - gen_count, talker, &gsa);
+            pack_mask &= ~TP_GSA;
         }
-        else if(pack_mask & GPGSV)
+        else if(pack_mask & TP_GSV)
         {
             gsv_count = nmea_gsv_npack(info->satinfo.inview);
             for(gsv_it = 0; gsv_it < gsv_count && buff_sz - gen_count > 0; ++gsv_it)
             {
-                nmea_info2GPGSV(info, &gsv, gsv_it);
-                gen_count += nmea_gen_GPGSV(buff + gen_count, buff_sz - gen_count, &gsv);
+                nmea_info2GSV(info, &gsv, gsv_it);
+                gen_count += nmea_gen_GSV(buff + gen_count, buff_sz - gen_count, talker, &gsv);
             }
-            pack_mask &= ~GPGSV;
+            pack_mask &= ~TP_GSV;
         }
-        else if(pack_mask & GPRMC)
+        else if(pack_mask & TP_RMC)
         {
-            nmea_info2GPRMC(info, &rmc);
-            gen_count += nmea_gen_GPRMC(buff + gen_count, buff_sz - gen_count, &rmc);
-            pack_mask &= ~GPRMC;
+            nmea_info2RMC(info, &rmc);
+            gen_count += nmea_gen_RMC(buff + gen_count, buff_sz - gen_count, talker, &rmc);
+            pack_mask &= ~TP_RMC;
         }
-        else if(pack_mask & GPVTG)
+        else if(pack_mask & TP_VTG)
         {
-            nmea_info2GPVTG(info, &vtg);
-            gen_count += nmea_gen_GPVTG(buff + gen_count, buff_sz - gen_count, &vtg);
-            pack_mask &= ~GPVTG;
+            nmea_info2VTG(info, &vtg);
+            gen_count += nmea_gen_VTG(buff + gen_count, buff_sz - gen_count, talker, &vtg);
+            pack_mask &= ~TP_VTG;
         }
         else
             break;

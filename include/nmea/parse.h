@@ -17,24 +17,25 @@
 extern "C" {
 #endif
 
+int nmea_pack_talker(const char *buff, int buff_sz);
 int nmea_pack_type(const char *buff, int buff_sz);
 int nmea_find_tail(const char *buff, int buff_sz, int *res_crc);
 
-int nmea_parse_GPGGA(const char *buff, int buff_sz, nmeaGPGGA *pack);
-int nmea_parse_GPGSA(const char *buff, int buff_sz, nmeaGPGSA *pack);
-int nmea_parse_GPGSV(const char *buff, int buff_sz, nmeaGPGSV *pack);
-int nmea_parse_GPRMC(const char *buff, int buff_sz, nmeaGPRMC *pack);
-int nmea_parse_GPVTG(const char *buff, int buff_sz, nmeaGPVTG *pack);
-int nmea_parse_GPZDA(const char *buff, int buff_sz, nmeaGPZDA *pack);
-int nmea_parse_GPGLL(const char *buff, int buff_sz, nmeaGPGLL *pack);
+int nmea_parse_GGA(const char *buff, int buff_sz, nmeaGGA *pack);
+int nmea_parse_GSA(const char *buff, int buff_sz, nmeaGSA *pack);
+int nmea_parse_GSV(const char *buff, int buff_sz, nmeaGSV *pack);
+int nmea_parse_RMC(const char *buff, int buff_sz, nmeaRMC *pack);
+int nmea_parse_VTG(const char *buff, int buff_sz, nmeaVTG *pack);
+int nmea_parse_ZDA(const char *buff, int buff_sz, nmeaZDA *pack);
+int nmea_parse_GLL(const char *buff, int buff_sz, nmeaGLL *pack);
 
-void nmea_GPGGA2info(nmeaGPGGA *pack, nmeaINFO *info);
-void nmea_GPGSA2info(nmeaGPGSA *pack, nmeaINFO *info);
-void nmea_GPGSV2info(nmeaGPGSV *pack, nmeaINFO *info);
-void nmea_GPRMC2info(nmeaGPRMC *pack, nmeaINFO *info);
-void nmea_GPVTG2info(nmeaGPVTG *pack, nmeaINFO *info);
-void nmea_GPZDA2info(nmeaGPZDA *pack, nmeaINFO *info);
-void nmea_GPGLL2info(nmeaGPGLL *pack, nmeaINFO *info);
+void nmea_GGA2info(nmeaGGA *pack, nmeaINFO *info);
+void nmea_GSA2info(nmeaGSA *pack, nmeaINFO *info);
+void nmea_GSV2info(nmeaGSV *pack, nmeaINFO *info);
+void nmea_RMC2info(nmeaRMC *pack, nmeaINFO *info);
+void nmea_VTG2info(nmeaVTG *pack, nmeaINFO *info);
+void nmea_ZDA2info(nmeaZDA *pack, nmeaINFO *info);
+void nmea_GLL2info(nmeaGLL *pack, nmeaINFO *info);
 
 #ifdef  __cplusplus
 }

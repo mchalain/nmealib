@@ -22,6 +22,7 @@
 
 typedef struct _nmeaParserNODE
 {
+	int packTalker;
     int packType;
     void *pack;
     struct _nmeaParserNODE *next_node;
@@ -87,32 +88,32 @@ int nmea_parse(
 
     nmea_parser_push(parser, buff, buff_sz);
 
-    while(GPNON != (ptype = nmea_parser_pop(parser, &pack)))
+    while(TP_NON != (ptype = nmea_parser_pop(parser, &pack)))
     {
         nread++;
 
         switch(ptype)
         {
-        case GPGGA:
-            nmea_GPGGA2info((nmeaGPGGA *)pack, info);
+        case TP_GGA:
+            nmea_GGA2info((nmeaGGA *)pack, info);
             break;
-        case GPGSA:
-            nmea_GPGSA2info((nmeaGPGSA *)pack, info);
+        case TP_GSA:
+            nmea_GSA2info((nmeaGSA *)pack, info);
             break;
-        case GPGSV:
-            nmea_GPGSV2info((nmeaGPGSV *)pack, info);
+        case TP_GSV:
+            nmea_GSV2info((nmeaGSV *)pack, info);
             break;
-        case GPRMC:
-            nmea_GPRMC2info((nmeaGPRMC *)pack, info);
+        case TP_RMC:
+            nmea_RMC2info((nmeaRMC *)pack, info);
             break;
-        case GPVTG:
-            nmea_GPVTG2info((nmeaGPVTG *)pack, info);
+        case TP_VTG:
+            nmea_VTG2info((nmeaVTG *)pack, info);
             break;
-        case GPZDA:
-            nmea_GPZDA2info((nmeaGPZDA *)pack, info);
+        case TP_ZDA:
+            nmea_ZDA2info((nmeaZDA *)pack, info);
             break;
-        case GPGLL:
-            nmea_GPGLL2info((nmeaGPGLL *)pack, info);
+        case TP_GLL:
+            nmea_GLL2info((nmeaGLL *)pack, info);
             break;
         };
 
@@ -128,7 +129,7 @@ int nmea_parse(
 
 int nmea_parser_real_push(nmeaPARSER *parser, const char *buff, int buff_sz)
 {
-    int nparsed = 0, crc, sen_sz, ptype;
+    int nparsed = 0, crc, sen_sz, ptype, ptalker;
     nmeaParserNODE *node = 0;
 
     NMEA_ASSERT(parser && parser->buffer);
@@ -166,96 +167,104 @@ int nmea_parser_real_push(nmeaPARSER *parser, const char *buff, int buff_sz)
         }
         else if(crc >= 0)
         {
-            ptype = nmea_pack_type(
+			if (parser->buffer[nparsed] != '$')
+				nparsed++;
+
+            ptalker = nmea_pack_talker(
                 (const char *)parser->buffer + nparsed + 1,
                 parser->buff_use - nparsed - 1);
+
+            ptype = nmea_pack_type(
+                (const char *)parser->buffer + nparsed + 3,
+                parser->buff_use - nparsed - 3);
 
             if(0 == (node = malloc(sizeof(nmeaParserNODE))))
                 goto mem_fail;
 
             node->pack = 0;
+            node->packTalker = ptalker;
 
             switch(ptype)
             {
-            case GPGGA:
-                if(0 == (node->pack = malloc(sizeof(nmeaGPGGA))))
+            case TP_GGA:
+                if(0 == (node->pack = malloc(sizeof(nmeaGGA))))
                     goto mem_fail;
-                node->packType = GPGGA;
-                if(!nmea_parse_GPGGA(
-                    (const char *)parser->buffer + nparsed,
-                    sen_sz, (nmeaGPGGA *)node->pack))
+                node->packType = TP_GGA;
+                if(!nmea_parse_GGA(
+                    (const char *)parser->buffer + nparsed + 3,
+                    sen_sz, (nmeaGGA *)node->pack))
                 {
                     free(node);
                     node = 0;
                 }
                 break;
-            case GPGSA:
-                if(0 == (node->pack = malloc(sizeof(nmeaGPGSA))))
+            case TP_GSA:
+                if(0 == (node->pack = malloc(sizeof(nmeaGSA))))
                     goto mem_fail;
-                node->packType = GPGSA;
-                if(!nmea_parse_GPGSA(
-                    (const char *)parser->buffer + nparsed,
-                    sen_sz, (nmeaGPGSA *)node->pack))
+                node->packType = TP_GSA;
+                if(!nmea_parse_GSA(
+                    (const char *)parser->buffer + nparsed + 3,
+                    sen_sz, (nmeaGSA *)node->pack))
                 {
                     free(node);
                     node = 0;
                 }
                 break;
-            case GPGSV:
-                if(0 == (node->pack = malloc(sizeof(nmeaGPGSV))))
+            case TP_GSV:
+                if(0 == (node->pack = malloc(sizeof(nmeaGSV))))
                     goto mem_fail;
-                node->packType = GPGSV;
-                if(!nmea_parse_GPGSV(
-                    (const char *)parser->buffer + nparsed,
-                    sen_sz, (nmeaGPGSV *)node->pack))
+                node->packType = TP_GSV;
+                if(!nmea_parse_GSV(
+                    (const char *)parser->buffer + nparsed + 3,
+                    sen_sz, (nmeaGSV *)node->pack))
                 {
                     free(node);
                     node = 0;
                 }
                 break;
-            case GPRMC:
-                if(0 == (node->pack = malloc(sizeof(nmeaGPRMC))))
+            case TP_RMC:
+                if(0 == (node->pack = malloc(sizeof(nmeaRMC))))
                     goto mem_fail;
-                node->packType = GPRMC;
-                if(!nmea_parse_GPRMC(
-                    (const char *)parser->buffer + nparsed,
-                    sen_sz, (nmeaGPRMC *)node->pack))
+                node->packType = TP_RMC;
+                if(!nmea_parse_RMC(
+                    (const char *)parser->buffer + nparsed + 3,
+                    sen_sz, (nmeaRMC *)node->pack))
                 {
                     free(node);
                     node = 0;
                 }
                 break;
-            case GPVTG:
-                if(0 == (node->pack = malloc(sizeof(nmeaGPVTG))))
+            case TP_VTG:
+                if(0 == (node->pack = malloc(sizeof(nmeaVTG))))
                     goto mem_fail;
-                node->packType = GPVTG;
-                if(!nmea_parse_GPVTG(
-                    (const char *)parser->buffer + nparsed,
-                    sen_sz, (nmeaGPVTG *)node->pack))
+                node->packType = TP_VTG;
+                if(!nmea_parse_VTG(
+                    (const char *)parser->buffer + nparsed + 3,
+                    sen_sz, (nmeaVTG *)node->pack))
                 {
                     free(node);
                     node = 0;
                 }
                 break;
-            case GPZDA:
-                if(0 == (node->pack = malloc(sizeof(nmeaGPZDA))))
+            case TP_ZDA:
+                if(0 == (node->pack = malloc(sizeof(nmeaZDA))))
                     goto mem_fail;
-                node->packType = GPZDA;
-                if(!nmea_parse_GPZDA(
-                    (const char *)parser->buffer + nparsed,
-                    sen_sz, (nmeaGPZDA *)node->pack))
+                node->packType = TP_ZDA;
+                if(!nmea_parse_ZDA(
+                    (const char *)parser->buffer + nparsed + 3,
+                    sen_sz, (nmeaZDA *)node->pack))
                 {
                     free(node);
                     node = 0;
                 }
                 break;
-            case GPGLL:
-                if(0 == (node->pack = malloc(sizeof(nmeaGPGLL))))
+            case TP_GLL:
+                if(0 == (node->pack = malloc(sizeof(nmeaGLL))))
                     goto mem_fail;
-                node->packType = GPGLL;
-                if(!nmea_parse_GPGLL(
-                    (const char *)parser->buffer + nparsed,
-                    sen_sz, (nmeaGPGLL *)node->pack))
+                node->packType = TP_GLL;
+                if(!nmea_parse_GLL(
+                    (const char *)parser->buffer + nparsed + 3,
+                    sen_sz, (nmeaGLL *)node->pack))
                 {
                     free(node);
                     node = 0;
@@ -324,7 +333,7 @@ int nmea_parser_push(nmeaPARSER *parser, const char *buff, int buff_sz)
  */
 int nmea_parser_top(nmeaPARSER *parser)
 {
-    int retval = GPNON;
+    int retval = TP_NON;
     nmeaParserNODE *node = (nmeaParserNODE *)parser->top_node;
 
     NMEA_ASSERT(parser && parser->buffer);
@@ -342,7 +351,7 @@ int nmea_parser_top(nmeaPARSER *parser)
  */
 int nmea_parser_pop(nmeaPARSER *parser, void **pack_ptr)
 {
-    int retval = GPNON;
+    int retval = TP_NON;
     nmeaParserNODE *node = (nmeaParserNODE *)parser->top_node;
 
     NMEA_ASSERT(parser && parser->buffer);
@@ -367,7 +376,7 @@ int nmea_parser_pop(nmeaPARSER *parser, void **pack_ptr)
  */
 int nmea_parser_peek(nmeaPARSER *parser, void **pack_ptr)
 {
-    int retval = GPNON;
+    int retval = TP_NON;
     nmeaParserNODE *node = (nmeaParserNODE *)parser->top_node;
 
     NMEA_ASSERT(parser && parser->buffer);
@@ -388,7 +397,7 @@ int nmea_parser_peek(nmeaPARSER *parser, void **pack_ptr)
  */
 int nmea_parser_drop(nmeaPARSER *parser)
 {
-    int retval = GPNON;
+    int retval = TP_NON;
     nmeaParserNODE *node = (nmeaParserNODE *)parser->top_node;
 
     NMEA_ASSERT(parser && parser->buffer);
