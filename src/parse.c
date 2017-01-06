@@ -340,7 +340,7 @@ int nmea_parse_RMC(const char *buff, int buff_sz, nmeaRMC *pack)
     nmea_trace_buff(buff, buff_sz);
 
     nsen = nmea_scanf(buff, buff_sz,
-        "$RMC,%s,%C,%f,%C,%f,%C,%f,%f,%2d%2d%2d,%f,%C,%C*",
+        "RMC,%s,%C,%f,%C,%f,%C,%f,%f,%2d%2d%2d,%f,%C,%C*",
         &(time_buff[0]),
         &(pack->status), &(pack->lat), &(pack->ns), &(pack->lon), &(pack->ew),
         &(pack->speed), &(pack->direction),
@@ -428,7 +428,7 @@ int nmea_parse_ZDA(const char *buff, int buff_sz, nmeaZDA *pack)
         &(pack->utc.day), &(pack->utc.mon), &(pack->utc.year),
         &(pack->lz_hour), &(pack->lz_min));
 
-    if(6 != nsen && 5 != nsen)
+    if(6 != nsen)
     {
         nmea_error("ZDA parse error!");
         return 0;
