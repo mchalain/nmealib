@@ -9,18 +9,18 @@
 
 void trace(const char *str, int str_size)
 {
-    printf("Trace: ");
-    write(1, str, str_size);
-    printf("\n");
+//    printf("Trace: ");
+//    write(1, str, str_size);
+//    printf("\n");
 }
 void error(const char *str, int str_size)
 {
-    printf("Error: ");
-    write(1, str, str_size);
-    printf("\n");
+//    printf("Error: ");
+//    write(1, str, str_size);
+//    printf("\n");
 }
 
-int main()
+int main(int argc, char **argv)
 {
     nmeaINFO info;
     nmeaPARSER parser;
@@ -29,7 +29,10 @@ int main()
     int size, it = 0;
     nmeaPOS dpos;
 
-    file = fopen("gpslog.txt", "rb");
+	if (argc > 1)
+		file = fopen(argv[1], "rb");
+	else
+		file = fopen("gpslog.txt", "rb");
 
     if(!file)
         return -1;

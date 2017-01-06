@@ -72,6 +72,24 @@ void nmea_parser_destroy(nmeaPARSER *parser)
 }
 
 /**
+ * \brief Destroy parser object
+ */
+void	nmea_parser_addcallback(nmeaPARSER *parser,
+		nmeaPACKTALKER talker, 
+		nmeaPACKTYPE type, 
+		_nmeaPARSERcallback callback)
+{
+	nmeaPARSERCB *nodecb;
+	
+	nodecb = calloc(1, sizeof(nmeaPARSERCB));
+	nodecb->next_callback = parser->first_callback;
+	parser->first_callback = nodecb;
+	nodecb->callback = callback;
+	nodecb->packType = type;
+	nodecb->packTalker = talker;
+}
+
+/**
  * \brief Analysis of buffer and put results to information structure
  * @return Number of packets wos parsed
  */
@@ -278,6 +296,16 @@ int nmea_parser_real_push(nmeaPARSER *parser, const char *buff, int buff_sz)
 
             if(node)
             {
+				nmeaPARSERCB *callback = parser->first_callback;
+				while (callback != NULL)
+				{
+					if (callback->packTalker == node->packTalker &&
+						callback->packType == node->packType)
+						callback->callback(node->packTalker,
+											node->packType, 
+											node->pack);
+					callback = callback->next_callback;
+				}
                 if(parser->end_node)
                     ((nmeaParserNODE *)parser->end_node)->next_node = node;
                 parser->end_node = node;

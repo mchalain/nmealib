@@ -12,6 +12,7 @@
 #define __NMEA_PARSER_H__
 
 #include "info.h"
+#include "sentence.h"
 
 #ifdef  __cplusplus
 extern "C" {
@@ -20,6 +21,15 @@ extern "C" {
 /*
  * high level
  */
+typedef void (*_nmeaPARSERcallback)(nmeaPACKTALKER talker, nmeaPACKTYPE type, void *pack);
+typedef struct _nmeaPARSERCB
+{
+	_nmeaPARSERcallback callback;
+	int packTalker;
+    int packType;
+    struct _nmeaPARSERCB *next_callback;
+
+} nmeaPARSERCB;
 
 typedef struct _nmeaPARSER
 {
@@ -28,11 +38,16 @@ typedef struct _nmeaPARSER
     unsigned char *buffer;
     int buff_size;
     int buff_use;
+    nmeaPARSERCB *first_callback;
 
 } nmeaPARSER;
 
 int     nmea_parser_init(nmeaPARSER *parser);
 void    nmea_parser_destroy(nmeaPARSER *parser);
+void	nmea_parser_addcallback(nmeaPARSER *parser,
+		nmeaPACKTALKER talker,
+		nmeaPACKTYPE type,
+		_nmeaPARSERcallback callback);
 
 int     nmea_parse(
         nmeaPARSER *parser,
