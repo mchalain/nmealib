@@ -24,7 +24,7 @@ int main()
     {
         gen_sz = nmea_generate_from(
             &buff[0], 2048, &info, gen,
-            GPGGA | GPGSA | GPGSV | GPRMC | GPVTG
+            TP_GGA | TP_GSA | TP_GSV | TP_RMC | TP_VTG
             );
 
         buff[gen_sz] = 0;
