@@ -193,7 +193,7 @@ static void _nmea_readdatetime(nmeaINFO *info, struct timespec *tp, int satinuse
 
 int nmea_gettime(clockid_t clk_id, struct timespec *tp)
 {
-	if ((CLOCK_GPS == clk_id || CLOCK_REALTIME == clk_id) && nmea_gpsfd > 2)
+	if (CLOCK_GPS == clk_id && nmea_gpsfd > 2)
 	{
 		if (! nmea_thread_running)
 			_nmea_readdatetime(&nmea_info, &nmea_tp, 2);
