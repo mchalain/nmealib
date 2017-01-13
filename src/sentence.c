@@ -12,9 +12,9 @@
 
 #include <string.h>
 
-void nmea_zero_GPGGA(nmeaGPGGA *pack)
+void nmea_zero_GGA(nmeaGGA *pack)
 {
-    memset(pack, 0, sizeof(nmeaGPGGA));
+    memset(pack, 0, sizeof(nmeaGGA));
     nmea_time_now(&pack->utc);
     pack->ns = 'N';
     pack->ew = 'E';
@@ -22,21 +22,21 @@ void nmea_zero_GPGGA(nmeaGPGGA *pack)
     pack->diff_units = 'M';
 }
 
-void nmea_zero_GPGSA(nmeaGPGSA *pack)
+void nmea_zero_GSA(nmeaGSA *pack)
 {
-    memset(pack, 0, sizeof(nmeaGPGSA));
+    memset(pack, 0, sizeof(nmeaGSA));
     pack->fix_mode = 'A';
     pack->fix_type = NMEA_FIX_BAD;
 }
 
-void nmea_zero_GPGSV(nmeaGPGSV *pack)
+void nmea_zero_GSV(nmeaGSV *pack)
 {
-    memset(pack, 0, sizeof(nmeaGPGSV));
+    memset(pack, 0, sizeof(nmeaGSV));
 }
 
-void nmea_zero_GPRMC(nmeaGPRMC *pack)
+void nmea_zero_RMC(nmeaRMC *pack)
 {
-    memset(pack, 0, sizeof(nmeaGPRMC));
+    memset(pack, 0, sizeof(nmeaRMC));
     nmea_time_now(&pack->utc);
     pack->status = 'V';
     pack->ns = 'N';
@@ -44,11 +44,25 @@ void nmea_zero_GPRMC(nmeaGPRMC *pack)
     pack->declin_ew = 'E';
 }
 
-void nmea_zero_GPVTG(nmeaGPVTG *pack)
+void nmea_zero_VTG(nmeaVTG *pack)
 {
-    memset(pack, 0, sizeof(nmeaGPVTG));
+    memset(pack, 0, sizeof(nmeaVTG));
     pack->dir_t = 'T';
     pack->dec_m = 'M';
     pack->spn_n = 'N';
     pack->spk_k = 'K';
+}
+
+void nmea_zero_ZDA(nmeaZDA *pack)
+{
+    memset(pack, 0, sizeof(nmeaZDA));
+    nmea_time_now(&pack->utc);
+}
+
+void nmea_zero_GLL(nmeaGLL *pack)
+{
+    memset(pack, 0, sizeof(nmeaGLL));
+    nmea_time_now(&pack->utc);
+    pack->status = 'V';
+    pack->ns = 'N';
 }

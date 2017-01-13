@@ -158,7 +158,7 @@ int nmea_scanf(const char *buff, int buff_sz, const char *format, ...)
             if(!width && ('c' == *format || 'C' == *format) && *buff != format[1])
                 width = 1;
 
-            if(width)
+            if(width && *buff != format[1] && *beg_fmt != '0')
             {
                 if(buff + width <= end_buf)
                     buff += width;

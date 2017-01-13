@@ -23,19 +23,19 @@ int     nmea_generate(
         int generate_mask           /* mask of sentence`s (e.g. GPGGA | GPGSA) */
         );
 
-int     nmea_gen_GPGGA(char *buff, int buff_sz, nmeaGPGGA *pack);
-int     nmea_gen_GPGSA(char *buff, int buff_sz, nmeaGPGSA *pack);
-int     nmea_gen_GPGSV(char *buff, int buff_sz, nmeaGPGSV *pack);
-int     nmea_gen_GPRMC(char *buff, int buff_sz, nmeaGPRMC *pack);
-int     nmea_gen_GPVTG(char *buff, int buff_sz, nmeaGPVTG *pack);
+int     nmea_gen_GGA(char *buff, int buff_sz, nmeaPACKTALKER talker, nmeaGGA *pack);
+int     nmea_gen_GSA(char *buff, int buff_sz, nmeaPACKTALKER talker, nmeaGSA *pack);
+int     nmea_gen_GSV(char *buff, int buff_sz, nmeaPACKTALKER talker, nmeaGSV *pack);
+int     nmea_gen_RMC(char *buff, int buff_sz, nmeaPACKTALKER talker, nmeaRMC *pack);
+int     nmea_gen_VTG(char *buff, int buff_sz, nmeaPACKTALKER talker, nmeaVTG *pack);
 
-void    nmea_info2GPGGA(const nmeaINFO *info, nmeaGPGGA *pack);
-void    nmea_info2GPGSA(const nmeaINFO *info, nmeaGPGSA *pack);
-void    nmea_info2GPRMC(const nmeaINFO *info, nmeaGPRMC *pack);
-void    nmea_info2GPVTG(const nmeaINFO *info, nmeaGPVTG *pack);
+void    nmea_info2GGA(const nmeaINFO *info, nmeaGGA *pack);
+void    nmea_info2GSA(const nmeaINFO *info, nmeaGSA *pack);
+void    nmea_info2RMC(const nmeaINFO *info, nmeaRMC *pack);
+void    nmea_info2VTG(const nmeaINFO *info, nmeaVTG *pack);
 
 int     nmea_gsv_npack(int sat_count);
-void    nmea_info2GPGSV(const nmeaINFO *info, nmeaGPGSV *pack, int pack_idx);
+void    nmea_info2GSV(const nmeaINFO *info, nmeaGSV *pack, int pack_idx);
 
 #ifdef  __cplusplus
 }
