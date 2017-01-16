@@ -3,7 +3,7 @@ CC:=$(strip $(CC))
 
 TARGET = libnmea
 BIN:=lib/$(TARGET).a
-MODULES = generate generator parse parser tok context time info gmath sentence  
+MODULES = generate generator parse parser tok context time info gmath sentence extended
 SAMPLES = generate generator parse parse_file math
  
 OBJ = $(MODULES:%=build/nmea_$(CC)/%.o) 
@@ -47,7 +47,7 @@ shared: BIN += lib/$(TARGET).so
 shared: all-before lib/$(TARGET).so samples all-after 
 
 lib/$(TARGET).so: $(LINKOBJ)
-	$(CC) -shared -Wl,-soname=$(TARGET) -o $@ $^ -lm
+	$(CC) -shared -Wl,-soname=$(TARGET) -o $@ $^ -lm -ldl -lpthread
 
 lib/$(TARGET).a: $(LINKOBJ)
 	$(CROSS_COMPILE)ar rsc $@ $^

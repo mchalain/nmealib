@@ -8,9 +8,14 @@
  *
  */
 
-/*! \file time.h */
+#include <stdlib.h>
 
+#include "nmea/parse.h"
+#include "nmea/parser.h"
+
+/*! \file time.h */
 #include "nmea/time.h"
+
 
 #ifdef NMEA_WIN
 #   pragma warning(disable: 4201)
@@ -61,3 +66,4 @@ void nmea_time_now(nmeaTIME *stm)
 }
 
 #endif
+

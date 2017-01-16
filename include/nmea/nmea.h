@@ -21,5 +21,6 @@
 #include "./parse.h"
 #include "./parser.h"
 #include "./context.h"
+#include "./extended.h"
 
 #endif /* __NMEA_H__ */
