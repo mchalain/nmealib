@@ -47,7 +47,7 @@ shared: BIN += lib/$(TARGET).so
 shared: all-before lib/$(TARGET).so samples  all-after
 
 lib/$(TARGET).so: $(LINKOBJ)
-	$(CC) -shared -Wl,-soname=$(TARGET) -o $@ $^ -lm -ldl -lrt
+	$(CC) -shared -Wl,-soname=$(TARGET) -o $@ $^ -lm -ldl -lrt -lpthread
 
 lib/$(TARGET).a: $(LINKOBJ)
 	$(CROSS_COMPILE)ar rsc $@ $^

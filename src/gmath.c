@@ -15,6 +15,25 @@
 #include <math.h>
 #include <float.h>
 
+static int dcmp(double d1, double d2)
+{
+    if (d1 > d2)
+    {
+        if ((d1 - d2) < fabs (d1 * DBL_EPSILON))
+            return 0;
+        else
+            return 1;
+    }
+    if (d1 < d2)
+    {
+        if ((d2 - d1) < fabs (d2 * DBL_EPSILON))
+            return 0;
+        else
+            return -1;
+    }
+    return 0;
+}
+
 /**
  * \fn nmea_degree2radian
  * \brief Convert degree to radian
@@ -120,7 +139,7 @@ double nmea_distance_ellipsoid(
     NMEA_ASSERT(from_pos != 0);
     NMEA_ASSERT(to_pos != 0);
 
-    if ((from_pos->lat == to_pos->lat) && (from_pos->lon == to_pos->lon))
+    if (!dcmp(from_pos->lat,to_pos->lat) && !dcmp(from_pos->lon, to_pos->lon))
     { /* Identical points */
         if ( from_azimuth != 0 )
             *from_azimuth = 0;

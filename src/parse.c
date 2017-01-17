@@ -26,25 +26,25 @@
  * 
  * switch(ptype)
  * {
- * case GPGGA:
- *     if(0 == (node->pack = malloc(sizeof(nmeaGPGGA))))
+ * case TP_GGA:
+ *     if(0 == (node->pack = malloc(sizeof(nmeaGGA))))
  *         goto mem_fail;
  *     node->packType = GPGGA;
- *     if(!nmea_parse_GPGGA(
+ *     if(!nmea_parse_GGA(
  *         (const char *)parser->buffer + nparsed,
- *         sen_sz, (nmeaGPGGA *)node->pack))
+ *         sen_sz, (nmeaGGA *)node->pack))
  *     {
  *         free(node);
  *         node = 0;
  *     }
  *     break;
- * case GPGSA:
- *     if(0 == (node->pack = malloc(sizeof(nmeaGPGSA))))
+ * case TP_GSA:
+ *     if(0 == (node->pack = malloc(sizeof(nmeaGSA))))
  *         goto mem_fail;
  *     node->packType = GPGSA;
- *     if(!nmea_parse_GPGSA(
+ *     if(!nmea_parse_GSA(
  *         (const char *)parser->buffer + nparsed,
- *         sen_sz, (nmeaGPGSA *)node->pack))
+ *         sen_sz, (nmeaGSA *)node->pack))
  *     {
  *         free(node);
  *         node = 0;
@@ -69,7 +69,7 @@ const char *nmeaTalkers[] = {
     "VD", "DM", "VW", "WI", "YX", "ZA", "ZC", "ZQ", "ZV"
 };
 
-int _nmea_parse_time(const char *buff, int buff_sz, nmeaTIME *res)
+static int _nmea_parse_time(const char *buff, int buff_sz, nmeaTIME *res)
 {
     int success = 0;
 
@@ -106,6 +106,7 @@ int _nmea_parse_time(const char *buff, int buff_sz, nmeaTIME *res)
 int nmea_pack_talker(const char *buff, int buff_sz)
 {
     int i;
+    UNUSED(buff_sz);
 
     NMEA_ASSERT(buff);
 

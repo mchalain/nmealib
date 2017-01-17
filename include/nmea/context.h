@@ -13,6 +13,8 @@
 
 #include "config.h"
 
+#define UNUSED(x) (void)(x)
+
 #define NMEA_DEF_PARSEBUFF  (1024)
 #define NMEA_MIN_PARSEBUFF  (256)
 
