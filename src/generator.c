@@ -20,7 +20,7 @@
 # pragma warning(disable: 4100) /* unreferenced formal parameter */
 #endif
 
-double nmea_random(double min, double max)
+static double nmea_random(double min, double max)
 {
     static double rand_max = RAND_MAX;
     double rand_val = rand();
@@ -117,15 +117,17 @@ int nmea_generate_from(
  * NOISE generator
  */
 
-int nmea_igen_noise_init(nmeaGENERATOR *gen, nmeaINFO *info)
+static int nmea_igen_noise_init(nmeaGENERATOR *gen, nmeaINFO *info)
 {
+    UNUSED(gen); UNUSED(info);
     return 1;
 }
 
-int nmea_igen_noise_loop(nmeaGENERATOR *gen, nmeaINFO *info)
+static int nmea_igen_noise_loop(nmeaGENERATOR *gen, nmeaINFO *info)
 {
     int it;
     int in_use;
+	UNUSED(gen);
 
     info->sig = (int)nmea_random(1, 3);
     info->PDOP = nmea_random(0, 9);
@@ -159,8 +161,9 @@ int nmea_igen_noise_loop(nmeaGENERATOR *gen, nmeaINFO *info)
     return 1;
 }
 
-int nmea_igen_noise_reset(nmeaGENERATOR *gen, nmeaINFO *info)
+static int nmea_igen_noise_reset(nmeaGENERATOR *gen, nmeaINFO *info)
 {
+    UNUSED(gen); UNUSED(info);
     return 1;
 }
 
@@ -168,14 +171,16 @@ int nmea_igen_noise_reset(nmeaGENERATOR *gen, nmeaINFO *info)
  * STATIC generator
  */
 
-int nmea_igen_static_loop(nmeaGENERATOR *gen, nmeaINFO *info)
+static int nmea_igen_static_loop(nmeaGENERATOR *gen, nmeaINFO *info)
 {
+	UNUSED(gen);
     nmea_time_now(&info->utc);
     return 1;
-};
+}
 
-int nmea_igen_static_reset(nmeaGENERATOR *gen, nmeaINFO *info)
+static int nmea_igen_static_reset(nmeaGENERATOR *gen, nmeaINFO *info)
 {
+	UNUSED(gen);
     info->satinfo.inuse = 4;
     info->satinfo.inview = 4;
 
@@ -206,7 +211,7 @@ int nmea_igen_static_reset(nmeaGENERATOR *gen, nmeaINFO *info)
     return 1;
 }
 
-int nmea_igen_static_init(nmeaGENERATOR *gen, nmeaINFO *info)
+static int nmea_igen_static_init(nmeaGENERATOR *gen, nmeaINFO *info)
 {
     info->sig = 3;
     info->fix = 3;
@@ -220,12 +225,13 @@ int nmea_igen_static_init(nmeaGENERATOR *gen, nmeaINFO *info)
  * SAT_ROTATE generator
  */
 
-int nmea_igen_rotate_loop(nmeaGENERATOR *gen, nmeaINFO *info)
+static int nmea_igen_rotate_loop(nmeaGENERATOR *gen, nmeaINFO *info)
 {
     int it;
     int count = info->satinfo.inview;
     double deg = 360 / (count?count:1);
     double srt = (count?(info->satinfo.sat[0].azimuth):0) + 5;
+	UNUSED(gen);
 
     nmea_time_now(&info->utc);
 
@@ -237,13 +243,14 @@ int nmea_igen_rotate_loop(nmeaGENERATOR *gen, nmeaINFO *info)
     }
 
     return 1;
-};
+}
 
-int nmea_igen_rotate_reset(nmeaGENERATOR *gen, nmeaINFO *info)
+static int nmea_igen_rotate_reset(nmeaGENERATOR *gen, nmeaINFO *info)
 {
     int it;
     double deg = 360 / 8;
     double srt = 0;
+	UNUSED(gen);
 
     info->satinfo.inuse = 8;
     info->satinfo.inview = 8;
@@ -261,7 +268,7 @@ int nmea_igen_rotate_reset(nmeaGENERATOR *gen, nmeaINFO *info)
     return 1;
 }
 
-int nmea_igen_rotate_init(nmeaGENERATOR *gen, nmeaINFO *info)
+static int nmea_igen_rotate_init(nmeaGENERATOR *gen, nmeaINFO *info)
 {
     info->sig = 3;
     info->fix = 3;
@@ -275,8 +282,9 @@ int nmea_igen_rotate_init(nmeaGENERATOR *gen, nmeaINFO *info)
  * POS_RANDMOVE generator
  */
 
-int nmea_igen_pos_rmove_init(nmeaGENERATOR *gen, nmeaINFO *info)
+static int nmea_igen_pos_rmove_init(nmeaGENERATOR *gen, nmeaINFO *info)
 {    
+	UNUSED(gen);
     info->sig = 3;
     info->fix = 3;
     info->direction = info->declination = 0;
@@ -284,9 +292,10 @@ int nmea_igen_pos_rmove_init(nmeaGENERATOR *gen, nmeaINFO *info)
     return 1;
 }
 
-int nmea_igen_pos_rmove_loop(nmeaGENERATOR *gen, nmeaINFO *info)
+static int nmea_igen_pos_rmove_loop(nmeaGENERATOR *gen, nmeaINFO *info)
 {
     nmeaPOS crd;
+	UNUSED(gen);
 
     info->direction += nmea_random(-10, 10);
     info->speed += nmea_random(-2, 3);
@@ -308,18 +317,19 @@ int nmea_igen_pos_rmove_loop(nmeaGENERATOR *gen, nmeaINFO *info)
     info->declination = info->direction;
 
     return 1;
-};
+}
 
-int nmea_igen_pos_rmove_destroy(nmeaGENERATOR *gen)
+static int nmea_igen_pos_rmove_destroy(nmeaGENERATOR *gen)
 {
+	UNUSED(gen);
     return 1;
-};
+}
 
 /*
  * generator create
  */
 
-nmeaGENERATOR * __nmea_create_generator(int type, nmeaINFO *info)
+static nmeaGENERATOR * __nmea_create_generator(int type, nmeaINFO *info)
 {
     nmeaGENERATOR *gen = 0;
 

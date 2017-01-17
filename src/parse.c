@@ -69,7 +69,7 @@ const char *nmeaTalkers[] = {
     "VD", "DM", "VW", "WI", "YX", "ZA", "ZC", "ZQ", "ZV"
 };
 
-int _nmea_parse_time(const char *buff, int buff_sz, nmeaTIME *res)
+static int _nmea_parse_time(const char *buff, int buff_sz, nmeaTIME *res)
 {
     int success = 0;
 
@@ -106,6 +106,7 @@ int _nmea_parse_time(const char *buff, int buff_sz, nmeaTIME *res)
 int nmea_pack_talker(const char *buff, int buff_sz)
 {
     int i;
+    UNUSED(buff_sz);
 
     NMEA_ASSERT(buff);
 

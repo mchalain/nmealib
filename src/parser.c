@@ -145,7 +145,7 @@ int nmea_parse(
  * low level
  */
 
-int nmea_parser_real_push(nmeaPARSER *parser, const char *buff, int buff_sz)
+static int nmea_parser_real_push(nmeaPARSER *parser, const char *buff, int buff_sz)
 {
     int nparsed = 0, crc, sen_sz, ptype, ptalker;
     nmeaParserNODE *node = 0;
