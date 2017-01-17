@@ -9,7 +9,9 @@
  */
 
 #ifdef __GNUC__
-#define _GNU_SOURCE
+#ifndef _GNU_SOURCE
+# define _GNU_SOURCE
+#endif
 #include <dlfcn.h>
 #endif
 
@@ -20,6 +22,7 @@
 
 #include <pthread.h>
 
+#include "nmea/context.h"
 #include "nmea/parse.h"
 #include "nmea/parser.h"
 
@@ -142,6 +145,7 @@ __attribute__((destructor)) void nmea_deinit()
 
 static void *_thread_readdatetime(void *unused)
 {
+	UNUSED(unused);
 	_nmea_readdatetime(&nmea_info, &nmea_tp, 2);
 	nmea_thread_running = 0;
 	return NULL;
