@@ -18,6 +18,7 @@ set(LIBRARY_SOVERSION "0")
 include_directories("include")
 
 add_library(${PROJECT_NAME} SHARED src/context.c src/generate.c src/generator.c src/gmath.c src/info.c src/parse.c src/parser.c src/sentence.c src/time.c src/tok.c)
+target_link_libraries(${PROJECT_NAME} dl pthread rt)
 
 set_target_properties(
     ${PROJECT_NAME}
