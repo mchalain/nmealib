@@ -55,7 +55,7 @@ install(
 	${includedir}/nmea/tok.h
 	${includedir}/nmea/units.h
   DESTINATION
-    ${INCLUDE_INSTALL_DIR}
+    ${INCLUDE_INSTALL_DIR}/nmea/
   COMPONENT
     headers
 )
