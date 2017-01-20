@@ -201,7 +201,7 @@ int nmea_gettime(clockid_t clk_id, struct timespec *tp)
 	{
 		if (! nmea_thread_running)
 			_nmea_readdatetime(&nmea_info, &nmea_tp, 2);
-		if (nmea_info.satinfo.inuse > 2)
+		//if (nmea_info.satinfo.inuse > 2)
 		{
 			struct timespec now = {0, 0};
 			if (nmea_deltatp.tv_sec > 0)
