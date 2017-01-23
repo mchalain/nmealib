@@ -216,11 +216,6 @@ int nmea_gettime(clockid_t clk_id, struct timespec *tp)
 			nmea_info.smask &= ~(TP_ZDA | TP_GGA | TP_RMC);
 			return 0;
 		}
-		else if (CLOCK_GPS == clk_id)
-		{
-			errno = EINVAL;
-			return -1;
-		}
 	}
 	return pclock_gettime(clk_id, tp);
 }
